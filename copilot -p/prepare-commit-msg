@@ -1,0 +1,63 @@
+#!/bin/bash
+# prepare-commit-msg hook to generate git commit messages using copilot -p
+# This hook generates concise commit messages using GitHub Copilot CLI
+
+# Get the staged diff
+STAGED_DIFF=$(git diff --cached 2>/dev/null)
+
+# If no staged changes, exit silently (don't modify commit message)
+if [ -z "$STAGED_DIFF" ]; then
+    exit 0
+fi
+
+# Limit diff to first 5000 characters to avoid token limits
+STAGED_DIFF_LIMITED="${STAGED_DIFF:0:5000}"
+
+# Create a prompt for copilot
+PROMPT="Generate a concise 1-2 sentence git commit message for the following staged code changes. Be brief and direct, focus on WHAT changed, not HOW:
+
+\`\`\`diff
+$STAGED_DIFF_LIMITED
+\`\`\`
+
+Return ONLY the commit message text, no quotes, no markdown, no explanation."
+
+# Generate commit message using copilot
+echo "🤖 Generating commit message with Copilot..."
+COMMIT_MESSAGE=$(copilot -p "$PROMPT" --model gpt-5-mini -s --allow-all-tools 2>/dev/null | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+# If generation failed or returned empty, don't modify commit message
+if [ -z "$COMMIT_MESSAGE" ]; then
+    echo "⚠️  Could not generate commit message."
+    exit 0
+fi
+
+# Display the generated message
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 Generated Commit Message:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "$COMMIT_MESSAGE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check if stdin is available (interactive mode)
+# if [ -t 0 ]; then
+#     # Interactive mode: ask user for confirmation
+#     read -p "✓ Use this message? (y/n) [y=yes, n=abort]: " -n 1 -r REPLY
+#     echo
+    
+#     if [[ $REPLY =~ ^[Yy]$ ]]; then
+#         # Accept: write the message to the commit message file
+#         echo "$COMMIT_MESSAGE" > "$1"
+#         exit 0
+#     else
+#         # Reject: don't modify the commit message (user will be prompted by git)
+#         exit 0
+#     fi
+# else
+    # Non-interactive mode: auto-accept and write message
+    echo "✓ (auto-accepting in non-interactive mode)"
+    echo "$COMMIT_MESSAGE" > "$1"
+    exit 0
+# fi
