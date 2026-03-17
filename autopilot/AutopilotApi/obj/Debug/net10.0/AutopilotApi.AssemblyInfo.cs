@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AutopilotApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9df61e9d1d15bb3b7b0a907f8198f2331a272980")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0d2e45163d4e31e13bfd98cd531259d1d8b5cf5d")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutopilotApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutopilotApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
