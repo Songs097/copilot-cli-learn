@@ -41,22 +41,9 @@ echo "$COMMIT_MESSAGE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check if stdin is available (interactive mode)
-# if [ -t 0 ]; then
-#     # Interactive mode: ask user for confirmation
-#     read -p "✓ Use this message? (y/n) [y=yes, n=abort]: " -n 1 -r REPLY
-#     echo
-    
-#     if [[ $REPLY =~ ^[Yy]$ ]]; then
-#         # Accept: write the message to the commit message file
-#         echo "$COMMIT_MESSAGE" > "$1"
-#         exit 0
-#     else
-#         # Reject: don't modify the commit message (user will be prompted by git)
-#         exit 0
-#     fi
-# else
-    # Non-interactive mode: auto-accept and write message
+
+
+
     echo "✓ (auto-accepting in non-interactive mode)"
     echo "$COMMIT_MESSAGE" > "$1"
     exit 0
