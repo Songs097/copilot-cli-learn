@@ -22,20 +22,20 @@ copilot
 # 交互方式使用 Copilot CLI
 
 交互方式适合“边问边改”的工作流，尤其适合探索代码、拆解任务、逐步修复问题。
-
+- `@`符号指定上下文
 - `/model`：切换大语言模型。
-- `/agent`：选择或自定义 agent，本质上可以理解成一套更聚焦的提示词和行为模式。  
-  - 用copilot辅助生成一个自定义Agent: `用资深程序员视角讲解代码`
-  - 网络里寻找合适的agent
+- `/agent`：选择或自定义 agent，本质上可以理解成一套更聚焦的提示词和行为模式.
 - `/context`：查看上下文使用情况。
 - `/fleet`：把可并行的任务交给多个线程或模型一起处理，执行过程中可以用 `/tasks` 查看后台任务。
 - `/delegate`：提交当前的修改并且创建PR，适合在 GitHub 上协作的项目。
+- `/share`: 分享当前session为一个md文档.
+- `/research` 利用 GitHub 搜索及网络资源，开展深入调研。
 - `quit` 后可以用 `copilot --continue` 回到上一个会话，也可以用 `/resume` 选择历史会话继续。
 
 
 ## Autopilot 模式
 
-Autopilot 更适合“可以自动执行”的任务。
+Autopilot 更适合“可以自动执行”,"可闭环执行"的任务。
 
 它的典型工作流程是：
 
@@ -45,8 +45,6 @@ Autopilot 更适合“可以自动执行”的任务。
 - 运行命令验证结果。
 - 发现错误后自动进入下一轮修复。
 - 直到它对结果有足够信心才结束。
-
-分享时可以把 Autopilot 理解成：
 
 - 普通模式像“你在驾驶，Copilot 给建议”。
 - Autopilot 像“你先给目标，Copilot 代你完成一段相对闭环的执行流程”。
@@ -68,7 +66,6 @@ copilot
 
 - Autopilot 很省事，但前提是任务边界要清晰。
 - 越是“目标明确、验证标准明确”的任务，Autopilot 的效果越好。
-- 对高风险改动，仍然建议先看 plan，再决定是否放权执行。
 
 ## PLAN 模式
 
@@ -87,7 +84,7 @@ copilot
 
 如果从分享视角来讲，Plan 模式最适合下面几类任务：
 
-- 需求比较模糊，需要先澄清设计决策。
+- 问题不明确,需求比较模糊，需要先澄清设计决策。
 - 改动范围比较大，不想让 AI 直接开改。
 - 需要团队一起评审方案，而不是马上落代码。
 
@@ -95,7 +92,7 @@ copilot
 
 - 不是“直接写代码”，而是“先让 AI 出施工图”。
 
-`/research` 也可以放在这一部分提一下，它更偏向调研和上下文收集，适合在写 plan 之前先做信息探索。
+`/research` 适合在写 plan 之前先做信息探索。
 
 ## CLI 和 IDE 可以搭配使用
 
@@ -112,7 +109,7 @@ copilot
 
 # 非交互方式使用 Copilot CLI
 
-非交互方式更适合自动化、脚本、CI/CD、单次命令。
+非交互方式更适合自动化、脚本、CI/CD、单次命令。想嵌入脚本或工作流水线，用 `-p` 非交互模式。
 
 它的优势是：
 
@@ -125,13 +122,13 @@ copilot
 ```bash
 copilot -p "解释一下这个命令出现的错误：$(npm run build 2>&1)"
 copilot -p "解释一下这个项目都干了什么：$(type ChatBot.sln)"
-copilot -p "Generate a conventional commit message for: $(git diff --staged)"
+copilot -p "为以下内容生成一条规范化提交信息： $(git diff --staged)"
 ```
 
 如果你希望它在单次命令里具备更多执行权限，也可以组合参数使用，例如：
 
 ```bash
-copilot -p --allow-all --silent --model Claude-opus-4.5 "analyze the current change set"
+copilot -p --allow-all --silent --model Claude-opus-4.5 "analyze the current change set and refactor the code to improve readability"
 ```
 
 如果你经常使用固定参数，可以在终端配置别名，例如：
@@ -143,29 +140,16 @@ alias poolCopilot="copilot --silent --allow-all --model xxxx"
 还可以把文件内容通过管道交给 Copilot：
 
 ```bash
-cat OrderService.cs | copilot --plan -p "重构这个 Service 方法以提高可读性"
+cat OrderService.cs | copilot -p "重构这个 Service 方法以提高可读性"
 ```
 
-这里分享时建议补一个经验：
-
+经验:
 - 单次命令非常适合“小而确定”的任务。
 - 如果任务需要多轮反馈，还是回到交互模式更高效。
 
 ### 在脚本中使用
 
-比如自动生成提交信息：
-
-```bash
-COMMIT_MSG=$(copilot -p "Generate a commit message for: $(git diff --staged)")
-git commit -m "$COMMIT_MSG"
-```
-
-再举两个更贴近日常开发的例子：
-
-```bash
-copilot -p "总结今天这个 PR 的主要变更：$(git diff --staged)"
-copilot -p "根据测试日志分析失败原因：$(npm test 2>&1)"
-```
+比如利用git的hooks，在提交前自动生成提交信息：
 
 适合在分享时强调的价值点：
 
@@ -188,30 +172,7 @@ CI/CD 里更适合把 Copilot CLI 用在“解释和汇总”上，而不是直�
 ```bash
 copilot -p "请总结本次构建失败的原因，并按优先级列出修复建议：$(npm run build 2>&1)"
 ```
-
-如果是团队分享，我建议在这里提醒一句：
-
 - 在 CI/CD 中使用时，重点不是“让 AI 代替流水线决策”，而是“让 AI 帮人更快理解流水线结果”。
-
-# 分享建议
-
-如果你准备拿这篇文档去做技术分享，我建议这样讲：
-
-- 第一部分先讲定位：Copilot CLI 不是聊天工具，而是终端里的 AI 助手。
-- 第二部分讲模式差异：交互式、Plan、Autopilot、非交互式，各自解决什么问题。
-- 第三部分讲真实收益：解释错误、生成计划、串联脚本、提升命令行效率。
-- 第四部分讲边界：权限控制、任务边界、结果验证。
-
-你还可以在分享中增加一页“什么时候该用哪种模式”：
-
-- 问题不明确，用 Plan。
-- 任务可闭环执行，用 Autopilot。
-- 只是想快速问一句，用交互模式。
-- 想嵌入脚本或流水线，用 `-p` 非交互模式。
-
-最后一句总结可以这么说：
-
-- Copilot CLI 的价值不只是“帮我写代码”，而是“让 AI 真正进入开发者已经在使用的终端工作流”。
 
 # CLI vs IDE 对比
 
